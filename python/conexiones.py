@@ -45,5 +45,26 @@ def recibir_datos_restaurantes():
     return chat
 
 
+@app.route('/formularioItinerarios', methods=['POST'])
+def recibir_datos_itinerarios():
+    # Acceder a los datos enviados via POST
+    destino = request.form['destino']
+    personas = request.form['personas']
+    ninos = request.form['ninos']
+    dias = request.form['dias']
+    preferencias = request.form['preferencias']
+    evitar = request.form['evitar']
+
+    query = "vamos a viajar a" + destino + "estares" +dias+  ", somos " + personas + " personas, " + ninos + " ten cuenta que nos interesa " + preferencias + " y deseamos evitar " + evitar + "tambien dame las coordenadas de los lugares a visitar"
+    query=  "Sigue estrictamnete lo indicado en" +query+ "devuelmelo en formato json, que siga estrictamente el formato de que comience siempre por la primera palabra itinerario en minuscula"
+    query= query+ r"que siga estrictamente la estructura de interface Actividad {lugar: string;descripcion: string;coordenadas: string;}interface Dia {Manana: Actividad[];Tarde: Actividad[];Noche: Actividad[];}interface Itinerario {dias: Dia[];}. Todo la informacion debe estar en español"
+    query= query + "debe tener una actividad turisticas la por la mañana, tarde y noche"
+    
+
+    
+    chat = obtener_respuesta_chat(query)
+    return chat
+
+
 if __name__ == '__main__':
     app.run(debug=True)
