@@ -84,15 +84,21 @@ class controladorUsuarios extends Controller
         $request->validate([
             'email' => 'required|string|email',
             'lugar' => 'required|string',
+            'tipo' => 'required|string',
         ]);
+
         $user = $this->collection->findOne(['email' => $request->email]);
+
         if ($user) {
+            $favoritoTipo = 'favoritos.' . $request->tipo;
             $this->collection->updateOne(
                 ['email' => $request->email],
-                ['$push' => ['favoritos.actividades' => ['lugar' => $request->lugar]]]
+                ['$push' => [$favoritoTipo => ['lugar' => $request->lugar]]]
             );
+
             return response()->json(['message' => 'Favorito added successfully'], 200);
         }
+
         return response()->json(['error' => 'User not found'], 404);
     }
 }
