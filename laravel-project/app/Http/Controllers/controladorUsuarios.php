@@ -80,25 +80,48 @@ class controladorUsuarios extends Controller
     }
 
     public function addFavorito(Request $request)
-    {
-        $request->validate([
-            'email' => 'required|string|email',
-            'lugar' => 'required|string',
-            'tipo' => 'required|string',
-        ]);
+{
+    $request->validate([
+        'email' => 'required|string|email',
+        'lugar' => 'required|string',
+        'tipo' => 'required|string',
+    ]);
 
-        $user = $this->collection->findOne(['email' => $request->email]);
+    $user = $this->collection->findOne(['email' => $request->email]);
 
-        if ($user) {
-            $favoritoTipo = 'favoritos.' . $request->tipo;
-            $this->collection->updateOne(
-                ['email' => $request->email],
-                ['$push' => [$favoritoTipo => ['lugar' => $request->lugar]]]
-            );
+    if ($user) {
+        $favoritoTipo = 'favoritos.' . $request->tipo;
+        $this->collection->updateOne(
+            ['email' => $request->email],
+            ['$push' => [$favoritoTipo => ['lugar' => $request->lugar]]]
+        );
 
-            return response()->json(['message' => 'Favorito added successfully'], 200);
-        }
-
-        return response()->json(['error' => 'User not found'], 404);
+        return response()->json(['message' => 'Favorito added successfully'], 200);
     }
+
+    return response()->json(['error' => 'User not found'], 404);
+}
+
+public function addFavoritoItinerario(Request $request)
+{
+    $request->validate([
+        'email' => 'required|string|email',
+        'itinerario' => 'required|array',
+    ]);
+
+    $user = $this->collection->findOne(['email' => $request->email]);
+
+    if ($user) {
+        $this->collection->updateOne(
+            ['email' => $request->email],
+            ['$push' => ['favoritos.itinerarios' => $request->itinerario]]
+        );
+
+        return response()->json(['message' => 'Favorito added successfully'], 200);
+    }
+
+    return response()->json(['error' => 'User not found'], 404);
+}
+
+
 }

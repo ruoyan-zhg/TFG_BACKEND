@@ -39,3 +39,6 @@ Route::post('login', [controladorUsuarios::class, 'login']);
 Route::post('get-favoritos', [controladorUsuarios::class, 'getFavoritos']);
 Route::post('add-favorito', [controladorUsuarios::class, 'addFavorito']);
 
+Route::post('addFavoritoItinerario', [controladorUsuarios::class, 'addFavoritoItinerario']);
+
+
