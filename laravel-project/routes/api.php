@@ -6,6 +6,7 @@ use App\Http\Controllers\controladorFlask;
 use App\Http\Controllers\controladorActividades;
 use App\Http\Controllers\controladorItinerarios;
 use App\Http\Controllers\controladorRestaurantes;
+use App\Http\Controllers\controladorUsuarios;
 
 /*
 |--------------------------------------------------------------------------
@@ -30,4 +31,7 @@ Route::get('/hacer-peticion-flask/{prompt}', [controladorFlask::class, 'hacerPet
 Route::post('/formularioactividades', [controladorActividades::class, 'formularioActividades']); 
 Route::post('/formulariorestaurantes', [controladorRestaurantes::class, 'formularioRestaurantes']);
 Route::post('/formularioitinerario', [controladorItinerarios::class, 'formularioItinerarios']);
+
+Route::post('register', [controladorUsuarios::class, 'register']);
+Route::post('login', [controladorUsuarios::class, 'login']);
 
