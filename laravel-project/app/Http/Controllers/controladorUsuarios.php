@@ -16,69 +16,83 @@ class controladorUsuarios extends Controller
     }
 
     public function register(Request $request)
-{
-    // Validar que el email y la contraseña están presentes en la solicitud
-    $request->validate([
-        'nombre' => 'required|string|max:255',
-        'email' => 'required|string|email|max:255',
-        'contrasena' => 'required|string|min:6',
-    ]);
+    {
+        $request->validate([
+            'nombre' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255',
+            'contrasena' => 'required|string|min:6',
+        ]);
 
-    // Comprobar si el usuario ya existe
-    $existingUser = $this->collection->findOne(['email' => $request->email]);
+        $existingUser = $this->collection->findOne(['email' => $request->email]);
 
-    if ($existingUser) {
-        return response()->json(['error' => 'El correo electrónico ya está registrado.'], 409);
+        if ($existingUser) {
+            return response()->json(['error' => 'El correo electrónico ya está registrado.'], 409);
+        }
+
+        $user = [
+            'nombre' => $request->nombre,
+            'email' => $request->email,
+            'contrasena' => bcrypt($request->contrasena),
+            'favoritos' => [
+                'actividades' => [],
+                'restaurantes' => [],
+                'itinerario' => []
+            ],
+            'historial' => [
+                'actividades' => [],
+                'restaurantes' => [],
+                'itinerario' => []
+            ]
+        ];
+
+        $this->collection->insertOne($user);
+
+        return response()->json($user, 201);
     }
 
-    // Crear nuevo usuario
-    $user = [
-        'nombre' => $request->nombre,
-        'email' => $request->email,
-        'contrasena' => bcrypt($request->contrasena),
-        'favoritos' => [
-            'actividades' => [],
-            'restaurantes' => [],
-            'itinerario' => []
-        ],
-        'historial' => [
-            'actividades' => [],
-            'restaurantes' => [],
-            'itinerario' => []
-        ]
-    ];
+    public function login(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|string|email',
+            'contrasena' => 'required|string',
+        ]);
 
-    $this->collection->insertOne($user);
+        $user = $this->collection->findOne(['email' => $request->email]);
 
-    return response()->json($user, 201);
-}
+        $userArray = json_decode(json_encode($user), true);
 
+        if (isset($userArray['contrasena']) && password_verify($request->contrasena, $userArray['contrasena'])) {
+            return response()->json(['message' => 'Login successful', 'user' => $userArray], 200);
+        }
 
-public function login(Request $request)
-{
-    // Validar que el email y la contraseña están presentes en la solicitud
-    $request->validate([
-        'email' => 'required|string|email',
-        'contrasena' => 'required|string',
-    ]);
-
-    $user = $this->collection->findOne(['email' => $request->email]);
-    // imprimir lo que hay en $user
-    //print_r($user);
-
-    // Convertir el usuario a un array para poder acceder a las propiedades correctamente
-    $userArray = json_decode(json_encode($user), true);
-
-
-    if (isset($userArray['contrasena']) && password_verify($request->contrasena, $userArray['contrasena'])) {
-        // Aquí puedes generar un token o manejar la sesión como prefieras
-        return response()->json(['message' => 'Login successful'], 200);
+        return response()->json(['error' => 'Unauthorized'], 401);
     }
 
-    
+    public function getFavoritos(Request $request)
+    {
+        $user = $this->collection->findOne(['email' => $request->email]);
 
-    return response()->json(['error' => 'Unauthorized'], 401);
-}
+        if ($user) {
+            return response()->json($user['favoritos'], 200);
+        }
 
-    
+        return response()->json(['error' => 'User not found'], 404);
+    }
+
+    public function addFavorito(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|string|email',
+            'lugar' => 'required|string',
+        ]);
+        $user = $this->collection->findOne(['email' => $request->email]);
+        if ($user) {
+            $this->collection->updateOne(
+                ['email' => $request->email],
+                ['$push' => ['favoritos.actividades' => ['lugar' => $request->lugar]]]
+            );
+            return response()->json(['message' => 'Favorito added successfully'], 200);
+        }
+        return response()->json(['error' => 'User not found'], 404);
+    }
 }
