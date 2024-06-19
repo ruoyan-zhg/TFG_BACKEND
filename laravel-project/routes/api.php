@@ -41,4 +41,7 @@ Route::post('add-favorito', [controladorUsuarios::class, 'addFavorito']);
 
 Route::post('addFavoritoItinerario', [controladorUsuarios::class, 'addFavoritoItinerario']);
 
+Route::post('get-historial', [controladorUsuarios::class, 'getHistorial']);
+Route::post('add-historial', [controladorUsuarios::class, 'addHistorial']);
 
+Route::post('addHistorialItinerario', [controladorUsuarios::class, 'addHistorialItinerario']);

@@ -79,7 +79,8 @@ class controladorUsuarios extends Controller
         return response()->json(['error' => 'User not found'], 404);
     }
 
-    public function addFavorito(Request $request)
+    
+public function addFavorito(Request $request)
 {
     $request->validate([
         'email' => 'required|string|email',
@@ -122,6 +123,67 @@ public function addFavoritoItinerario(Request $request)
 
     return response()->json(['error' => 'User not found'], 404);
 }
+
+public function addHistorial(Request $request)
+{
+    $request->validate([
+        'email' => 'required|string|email',
+        'lugares' => 'required|array',
+        'lugares.*' => 'required|string',
+        'tipo' => 'required|string',
+    ]);
+
+    $user = $this->collection->findOne(['email' => $request->email]);
+
+    if ($user) {
+        $historialTipo = 'historial.' . $request->tipo;
+        $lugares = $request->lugares;
+
+        foreach ($lugares as $lugar) {
+            $this->collection->updateOne(
+                ['email' => $request->email],
+                ['$push' => [$historialTipo => ['lugar' => $lugar]]]
+            );
+        }
+
+        return response()->json(['message' => 'historial added successfully'], 200);
+    }
+
+    return response()->json(['error' => 'User not found'], 404);
+}
+    
+    public function addHistorialItinerario(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|string|email',
+            'itinerario' => 'required|array',
+        ]);
+    
+        $user = $this->collection->findOne(['email' => $request->email]);
+    
+        if ($user) {
+            $this->collection->updateOne(
+                ['email' => $request->email],
+                ['$push' => ['historial.itinerarios' => $request->itinerario]]
+            );
+    
+            return response()->json(['message' => 'historial added successfully'], 200);
+        }
+    
+        return response()->json(['error' => 'User not found'], 404);
+    }
+
+    public function getHistorial(Request $request)
+    {
+        $user = $this->collection->findOne(['email' => $request->email]);
+
+        if ($user) {
+            return response()->json($user['historial'], 200);
+        }
+
+        return response()->json(['error' => 'User not found'], 404);
+    }
+
 
 
 }
